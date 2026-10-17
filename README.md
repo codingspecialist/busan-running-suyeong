@@ -3,7 +3,7 @@
 APEC 나루공원 → 좌수영교 부근 → 과정교 부근 → 같은 길로 복귀.
 책에 넣을 QR코드로 여는 실제 지도 기반 경로 재생 페이지입니다.
 
-- 공개 주소(예정): https://codingspecialist.github.io/busan-running-suyeong/
+- 공개 주소: https://codingspecialist.github.io/busan-running-suyeong/
 - 코스 참고: [달려라부산 러닝크루 러닝코스 소개](https://runbusancrew.com/course.html) — APEC 나루공원 A코스, 공식 안내 **4km**
 - 좌표 계산 거리: **3.57km** (왕복, 편도 1.79km)
 
