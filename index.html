@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>수영강 왕복 코스 · 부산 초보 러너 지도</title>
+<meta name="description" content="APEC 나루공원에서 과정교 부근까지 수영강 동쪽 강변을 따라 갔다가 같은 길로 돌아오는 러닝 코스. 실제 지도 위에서 경로를 미리 따라가 볼 수 있어요.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Cpath d='M6 26 C12 18 10 10 26 6' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='6' cy='26' r='3.5' fill='%23000'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+<header class="head">
+  <p class="series">부산 초보 러너 지도 <span>코스 1</span></p>
+  <h1>수영강, 왔던 길로<br>돌아오기</h1>
+  <p class="lede">APEC 나루공원에서 과정교 부근까지 강변을 따라 갔다가, 같은 길로 돌아와요.</p>
+  <dl class="dist">
+    <div><dt>공식 안내 거리</dt><dd>4<small>km</small></dd></div>
+    <div><dt>좌표로 잰 거리</dt><dd id="dist-computed">3.57<small>km</small></dd></div>
+  </dl>
+</header>
+
+<figure class="figure" id="figure">
+  <div class="map-frame">
+    <div id="map" role="region" aria-label="수영강 코스 지도"></div>
+    <div class="map-tools" aria-label="지도 도구">
+      <button type="button" id="zoom-in" aria-label="지도 확대">＋</button>
+      <button type="button" id="zoom-out" aria-label="지도 축소">－</button>
+      <button type="button" id="fit" class="txt">전체 경로</button>
+      <button type="button" id="follow" class="txt" aria-pressed="true">따라가기</button>
+    </div>
+    <p class="map-msg" id="map-msg">지도를 불러오는 중이에요.</p>
+  </div>
+
+  <div class="dock" aria-label="경로 재생">
+    <div class="readout">
+      <p class="now" id="now" aria-live="polite">출발할 준비가 됐어요</p>
+      <p class="km"><b id="km-now">0.00</b> / <span id="km-total">3.57</span> km</p>
+    </div>
+    <div class="scrub">
+      <input type="range" id="scrub" min="0" max="1000" step="1" value="0" aria-label="재생 위치">
+      <div class="ticks" id="ticks" aria-hidden="true"></div>
+    </div>
+    <div class="buttons">
+      <button type="button" id="reset" class="icon" aria-label="처음으로">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14" /><path d="M19 5 9 12l10 7z" /></svg>
+      </button>
+      <button type="button" id="play" class="play" aria-label="재생">
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5 19.5 12 7 19.5z" /></svg>
+        <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14M17 5v14" /></svg>
+        <span id="play-label">재생</span>
+      </button>
+      <div class="speed" role="radiogroup" aria-label="재생 속도">
+        <button type="button" role="radio" data-speed="1" aria-checked="true">1×</button>
+        <button type="button" role="radio" data-speed="2" aria-checked="false">2×</button>
+        <button type="button" role="radio" data-speed="4" aria-checked="false">4×</button>
+      </div>
+    </div>
+    <ol class="segs" id="segs" aria-label="구간으로 이동"></ol>
+  </div>
+
+  <figcaption>
+    <span class="legend"><i class="lg-route"></i>달릴 길</span>
+    <span class="legend"><i class="lg-nofoot"></i>보행 금지로 등록된 자전거길</span>
+    <span class="legend"><i class="lg-river"></i>수영강</span>
+    <span class="cap-note">1× 재생은 약 1분이에요. 실제 달리기 속도와는 달라요.</span>
+  </figcaption>
+</figure>
+
+<main class="text">
+
+<section>
+  <h2>코스 순서</h2>
+  <ol class="stops" id="stops"></ol>
+</section>
+
+<section>
+  <h2>어떤 길을 달리나요</h2>
+  <p>강을 건너는 다리는 하나도 쓰지 않아요. 좌수영교와 과정교는 다리 아래 강변길로만 지나가요.</p>
+  <table class="kinds">
+    <caption>편도 기준, 좌표로 잰 길이</caption>
+    <tbody>
+      <tr><th>보행로</th><td id="kind-foot">0.79km</td><td>나루공원 안과 좌수영교 앞뒤</td></tr>
+      <tr><th>보행 허용 자전거길</th><td id="kind-cycle">1.00km</td><td>좌수영교 북쪽부터 과정교까지</td></tr>
+    </tbody>
+  </table>
+  <p>뒤쪽 구간은 자전거와 함께 쓰는 길로 등록돼 있어요. 자전거가 지나가니 한쪽으로 붙어서 달리고, 뒤를 자주 살펴 주세요.</p>
+  <p>나루공원 안에는 <em>보행 금지</em>로 등록된 자전거길이 따로 있어요. 지도에 점선으로 그렸고, 이 경로는 그 길을 쓰지 않아요.</p>
+</section>
+
+<section>
+  <h2>두 거리가 다른 이유</h2>
+  <p>공식 안내는 4km, 이 지도에서 좌표로 잰 왕복은 <b id="dist-computed-2">3.57km</b>예요.</p>
+  <p>공식 코스의 정확한 반환 지점과 공원 안 동선은 안내에 나와 있지 않아서, 차이가 어디서 생기는지는 확인하지 못했어요. 이 지도는 야외무대 앞에서 출발해 과정교 바로 앞에서 돌아서는 가장 짧은 강변 경로를 그렸어요.</p>
+</section>
+
+<section class="method">
+  <h2>이 지도를 만든 방법</h2>
+  <ol>
+    <li>달려라부산 공식 코스의 경유 순서(나루공원 → 좌수영교 → 과정교 → 나루공원)를 따랐어요.</li>
+    <li>OpenStreetMap에 등록된 길 가운데 사람이 걸을 수 있게 표시된 길만 이어 붙였어요. 보행 금지 표시가 있거나 보행 허용 표시가 없는 자전거 전용길, 자동차 전용 도로는 뺐어요.</li>
+    <li>경로가 수영강 물 영역에 들어가거나 강을 가로지르지 않는지 좌표로 확인했어요.</li>
+  </ol>
+  <p class="warn"><b>현장에서 확인하지 않은 경로예요.</b> 실측 GPS 기록이나 답사로 검증하지 않았어요. 공사, 침수, 통행 제한 같은 현재 상황은 반영되지 않으니 현장 표지판을 먼저 따라 주세요. 길 안내나 경로 이탈 알림 기능은 없어요.</p>
+  <p class="meta">지도 데이터 기준 <span id="osm-base">2026-10-17</span> · 확인한 날 2026-10-18</p>
+</section>
+
+<section class="share" id="share">
+  <h2>책에서 휴대전화로</h2>
+  <div class="share-row">
+    <img src="qr/qr.svg" width="148" height="148" alt="이 지도로 연결되는 QR코드">
+    <div>
+      <p>카메라로 QR코드를 비추면 이 지도가 열려요.</p>
+      <p class="url" id="page-url">codingspecialist.github.io/busan-running-suyeong</p>
+      <p class="links">
+        <button type="button" id="copy" class="txt">주소 복사</button>
+        <a class="txt" href="data/suyeong-apec-gwajeong.gpx" download>GPX 받기</a>
+        <a class="txt" href="print/route-print.png" download>인쇄용 지도</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p>지도와 경로 좌표: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>. 이 페이지의 경로·지도 데이터와 GPX도 ODbL을 따라요.</p>
+  <p>코스 참고: <a href="https://runbusancrew.com/course.html">달려라부산 러닝크루 러닝코스 소개</a> (APEC 나루공원 A코스, 4km)</p>
+  <p>지도 표시: <a href="https://leafletjs.com">Leaflet</a> (BSD-2-Clause). 글꼴: 고운바탕, IBM Plex Sans KR (SIL OFL 1.1).</p>
+  <p>공식 코스나 기관의 안내가 아니라, 책을 위해 만든 샘플이에요.</p>
+</footer>
+
+</div>
+<noscript><p class="noscript">경로 재생에는 JavaScript가 필요해요.</p></noscript>
+<script src="vendor/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
